@@ -1,0 +1,43 @@
+# Configuration file for LSTM Frequency Extraction
+
+# Data Generation Parameters
+data:
+  num_train_instances: 1      # Single signal instance
+  num_test_instances: 1       # Same signal, different noise
+  frequencies: [1.0, 3.0, 5.0, 7.0]  # 4 frequencies
+  sampling_rate: 1000         # 1000 Hz sampling rate
+  duration: 10.0              # 10 seconds = 10,000 time samples
+  noise_std: 0.1
+  train_seed: 1               # Training noise seed
+  test_seed: 2                # Test noise seed (different)
+  signal_seed: 42             # Signal generation seed (same for both)
+
+# Model Architecture Parameters
+model:
+  input_size: 5
+  hidden_size: 64
+  num_layers: 1
+  dropout: 0.0
+  output_size: 1
+
+# Training Parameters
+training:
+  batch_size: 1
+  num_epochs: 100
+  learning_rate: 0.001
+  patience: 20
+  random_seed: 42
+  gradient_clip: 1.0
+
+# Paths
+paths:
+  save_dir: outputs/models
+  log_dir: outputs/logs
+  results_dir: outputs/results
+  plots_dir: outputs/plots
+
+# Visualization Parameters
+visualization:
+  time_window: 2.0
+  dpi: 150
+
