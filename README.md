@@ -2,6 +2,26 @@
 
 A PyTorch implementation of an LSTM neural network that learns to extract individual frequency components from noisy mixed signals through supervised learning.
 
+---
+
+## 📚 Documentation
+
+**Complete documentation is available in the [`Documentation/`](Documentation/) folder:**
+
+- **[Quick Start](Documentation/QUICKSTART.md)** - Get running in 5 minutes
+- **[Installation Guide](Documentation/INSTALLATION.md)** - Detailed setup instructions
+- **[Architecture](Documentation/ARCHITECTURE.md)** - System design and components
+- **[API Reference](Documentation/API_DOCUMENTATION.md)** - Complete API documentation
+- **[Testing Guide](Documentation/TESTING.md)** - How to run and write tests
+- **[Troubleshooting](Documentation/TROUBLESHOOTING.md)** - Common issues and solutions
+- **[Contributing](Documentation/CONTRIBUTING.md)** - How to contribute
+- **[Training Results](Documentation/TRAINING_RESULTS.md)** - Latest training results
+- **[User Prompts History](Documentation/USER_PROMPTS_HISTORY.md)** - Project creation history
+
+**→ [Full Documentation Index](Documentation/INDEX.md)**
+
+---
+
 ## Overview
 
 This project implements an LSTM-based system that can isolate pure frequency components (1Hz, 3Hz, 5Hz, 7Hz) from noisy mixed signals. The model learns to act as a frequency-selective filter by processing time-series data with a one-hot encoded frequency indicator.
@@ -11,32 +31,66 @@ This project implements an LSTM-based system that can isolate pure frequency com
 - **Supervised Learning**: Trains on synthetic signals with known ground truth
 - **State Management**: LSTM maintains state across time steps within each signal instance, resets only between instances
 - **Temporal Learning**: Uses LSTM memory to learn sequential patterns
+- **Comprehensive Testing**: 35+ unit tests with >85% coverage
 - **Comprehensive Evaluation**: Multiple metrics and visualizations
 - **Reproducible**: Fixed random seeds for consistent results
-- **Well-Documented**: Clear code structure with extensive documentation
+- **Well-Documented**: Extensive documentation and API reference
+- **GPU Support**: Google Colab integration for GPU training
 
 ## Project Structure
 
 ```
 LSTM2/
-├── planning.md              # High-level project plan
-├── tasks.md                 # Detailed task breakdown
-├── prd.md                   # Product requirements document
-├── claude.md                # AI assistant project definition
-├── data_generator.py        # Dataset generation
-├── model.py                 # LSTM model architecture
-├── train.py                 # Training script
-├── evaluate.py              # Evaluation script
-├── plot_results.py          # Visualization utilities
-├── config.yaml              # Configuration file
-├── requirements.txt         # Python dependencies
-├── README.md                # This file
-├── L2-homework.pdf          # Original assignment
-└── outputs/                 # Generated outputs
-    ├── models/              # Saved model checkpoints
-    ├── logs/                # Training logs
-    ├── results/             # Evaluation results
-    └── plots/               # Generated visualizations
+├── Core Implementation
+│   ├── data_generator.py        # Dataset generation
+│   ├── model.py                 # LSTM model architecture
+│   ├── train.py                 # Training script
+│   ├── evaluate.py              # Evaluation script
+│   ├── visualize_data.py        # Data visualization
+│   └── plot_results.py          # Result visualization
+│
+├── Testing
+│   ├── test_units.py            # Unit tests (35 tests)
+│   ├── test_system.py           # System integration test
+│   └── pytest.ini               # Pytest configuration
+│
+├── Configuration
+│   ├── config.yaml              # Hyperparameters
+│   └── requirements.txt         # Dependencies
+│
+├── Documentation/               # Complete documentation
+│   ├── INDEX.md                 # Documentation index
+│   ├── QUICKSTART.md
+│   ├── INSTALLATION.md
+│   ├── ARCHITECTURE.md
+│   ├── API_DOCUMENTATION.md
+│   ├── TESTING.md
+│   ├── TROUBLESHOOTING.md
+│   ├── CONTRIBUTING.md
+│   ├── TRAINING_RESULTS.md
+│   ├── COLAB_INSTRUCTIONS.md
+│   ├── GPU_INFO.md
+│   ├── USER_PROMPTS_HISTORY.md
+│   ├── PROJECT_SUMMARY.md
+│   ├── prd.md
+│   ├── planning.md
+│   ├── tasks.md
+│   └── claude.md
+│
+├── Google Colab
+│   └── train_colab.py           # Self-contained Colab script
+│
+├── Outputs/ (gitignored)
+│   ├── models/                  # Trained model checkpoints
+│   ├── logs/                    # Training logs
+│   ├── results/                 # Evaluation results
+│   └── plots/                   # Visualizations
+│
+└── Other
+    ├── README.md                # This file
+    ├── L2-homework.pdf          # Original assignment
+    ├── .gitignore
+    └── LICENSE
 ```
 
 ## Installation
