@@ -29,13 +29,6 @@ htmlcov/
 .coverage
 .pytest_cache/
 
-# Output files (keep structure, ignore large files)
-outputs/models/*.pth
-outputs/logs/*.json
-outputs/results/*.json
-outputs/results/*.npz
-outputs/plots/*.png
-
 # System files
 .DS_Store
 Thumbs.db
