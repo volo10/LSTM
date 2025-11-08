@@ -24,6 +24,11 @@ ENV/
 # Jupyter Notebook
 .ipynb_checkpoints
 
+# Testing
+htmlcov/
+.coverage
+.pytest_cache/
+
 # Output files (keep structure, ignore large files)
 outputs/models/*.pth
 outputs/logs/*.json
