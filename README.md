@@ -47,7 +47,8 @@ LSTM2/
 │   ├── train.py                 # Training script
 │   ├── evaluate.py              # Evaluation script
 │   ├── visualize_data.py        # Data visualization
-│   └── plot_results.py          # Result visualization
+│   ├── plot_results.py          # Result visualization
+│   └── create_assignment_plots.py  # Assignment-specific graphs
 │
 ├── Testing
 │   ├── test_units.py            # Unit tests (35 tests)
@@ -85,6 +86,7 @@ LSTM2/
 │   ├── logs/                    # Training logs
 │   ├── results/                 # Evaluation results
 │   └── plots/                   # Visualizations
+│       └── assignment/          # Assignment-specific graphs
 │
 └── Other
     ├── README.md                # This file
@@ -131,6 +133,9 @@ python evaluate.py
 
 # 3. Generate visualizations
 python plot_results.py
+
+# 4. Generate assignment-specific graphs (optional)
+python create_assignment_plots.py
 ```
 
 ### Step-by-Step Guide
@@ -262,6 +267,24 @@ This creates:
 
 All plots are saved to `outputs/plots/`.
 
+#### 5. Assignment-Specific Graphs
+
+Generate the graphs specifically requested in the assignment document:
+
+```bash
+python create_assignment_plots.py
+```
+
+This creates:
+- **f2_overlay_2sec.png**: Overlay plot for f₂ (3 Hz) showing:
+  - Target signal (no noise)
+  - Noisy input signal S(t)
+  - LSTM output
+- **f2_overlay_5sec.png**: Extended 5-second view of f₂
+- **all_frequencies_comparison.png**: Separate plots for each frequency (f₁–f₄) comparing Target vs Predicted signals
+
+All assignment plots are saved to `outputs/plots/assignment/`.
+
 ### Testing Individual Components
 
 Test the model architecture:
@@ -366,6 +389,11 @@ After training, you'll find:
 - `outputs/plots/per_frequency_mse.png`: Per-frequency performance
 - `outputs/plots/error_distribution.png`: Error histograms
 - `outputs/plots/error_over_time.png`: Time-series error analysis
+
+### Assignment Plots
+- `outputs/plots/assignment/f2_overlay_2sec.png`: Overlay plot for f₂ (3 Hz)
+- `outputs/plots/assignment/f2_overlay_5sec.png`: Extended 5-second view of f₂
+- `outputs/plots/assignment/all_frequencies_comparison.png`: All frequencies comparison
 
 ## Troubleshooting
 
