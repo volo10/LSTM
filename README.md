@@ -136,6 +136,50 @@ python plot_results.py
 
 # 4. Generate assignment-specific graphs (optional)
 python create_assignment_plots.py
+
+# 5. Run parameter sensitivity analysis (optional but recommended)
+python sensitivity_analysis.py
+```
+
+### Advanced Analysis
+
+#### Parameter Sensitivity Analysis
+
+Systematically analyze the impact of hyperparameters on model performance:
+
+```bash
+python sensitivity_analysis.py
+```
+
+This will:
+- Test different hidden sizes (16, 32, 64, 128, 256)
+- Test different learning rates (0.0001, 0.0005, 0.001, 0.005, 0.01)
+- Test different noise levels (0.0, 0.05, 0.1, 0.2, 0.3)
+- Test different numbers of layers (1, 2, 3)
+- Generate comprehensive analysis plots
+- Save results to `outputs/results/sensitivity_analysis.json`
+
+**Expected runtime:** ~2.5 hours on CPU, ~15-20 minutes on GPU
+
+#### Interactive Analysis Notebook
+
+Explore results interactively using Jupyter Notebook:
+
+```bash
+jupyter notebook notebooks/results_analysis.ipynb
+```
+
+The notebook includes:
+- Statistical analysis of results
+- Hypothesis testing (train vs test)
+- Error distribution analysis
+- Parameter sensitivity visualization
+- Cost analysis
+- Mathematical formulations with LaTeX
+
+**Requirements:** Install jupyter:
+```bash
+pip install jupyter
 ```
 
 ### Step-by-Step Guide
@@ -475,10 +519,41 @@ history = train_model(
 
 ## Documentation
 
-- **planning.md**: High-level project approach and phases
-- **tasks.md**: Detailed task breakdown and checklist
-- **prd.md**: Complete product requirements
-- **claude.md**: AI assistant project definition
+### Core Documentation
+- **[README.md](README.md)**: This file - complete project overview
+- **[QUICKSTART.md](Documentation/QUICKSTART.md)**: Get running in 5 minutes
+- **[INSTALLATION.md](Documentation/INSTALLATION.md)**: Detailed setup instructions
+
+### Technical Documentation
+- **[ARCHITECTURE.md](Documentation/ARCHITECTURE.md)**: System design and components
+- **[API_DOCUMENTATION.md](Documentation/API_DOCUMENTATION.md)**: Complete API reference
+- **[prd.md](Documentation/prd.md)**: Product Requirements Document
+- **[TESTING.md](Documentation/TESTING.md)**: Testing guide and strategies
+
+### Analysis & Research
+- **[TRAINING_RESULTS.md](Documentation/TRAINING_RESULTS.md)**: Training results and analysis
+- **[COST_ANALYSIS.md](Documentation/COST_ANALYSIS.md)**: Computational cost breakdown ⭐ NEW
+- **[notebooks/results_analysis.ipynb](notebooks/results_analysis.ipynb)**: Interactive analysis ⭐ NEW
+- **[sensitivity_analysis.py](sensitivity_analysis.py)**: Parameter sensitivity script ⭐ NEW
+
+### Architectural Decision Records (ADRs)
+- **[ADR-001](Documentation/ADRs/001-lstm-state-management.md)**: LSTM State Management Strategy ⭐ NEW
+- **[ADR-002](Documentation/ADRs/002-sequence-length-interpretation.md)**: Sequence Length L=1 Interpretation ⭐ NEW
+- **[ADR-003](Documentation/ADRs/003-loss-function-selection.md)**: Loss Function Selection ⭐ NEW
+
+### User Guides
+- **[TROUBLESHOOTING.md](Documentation/TROUBLESHOOTING.md)**: Common issues and solutions
+- **[CONTRIBUTING.md](Documentation/CONTRIBUTING.md)**: Contribution guidelines
+- **[COLAB_INSTRUCTIONS.md](Documentation/COLAB_INSTRUCTIONS.md)**: Google Colab setup
+
+### Project Management
+- **[planning.md](Documentation/planning.md)**: High-level project approach
+- **[tasks.md](Documentation/tasks.md)**: Task breakdown and checklist
+- **[USER_PROMPTS_HISTORY.md](Documentation/USER_PROMPTS_HISTORY.md)**: Project creation history
+
+### Configuration & Security
+- **[.env.example](.env.example)**: Environment variables template ⭐ NEW
+- **[config.yaml](config.yaml)**: Model and training configuration
 
 ## License
 

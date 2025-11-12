@@ -6,9 +6,39 @@ This script performs a minimal test of the entire pipeline without full training
 
 import torch
 import numpy as np
+import pytest
 from data_generator import create_datasets, FrequencyExtractionDataset
 from model import FrequencyExtractorLSTM
 from torch.utils.data import DataLoader
+
+
+@pytest.fixture
+def train_test_datasets():
+    """Fixture to create train and test datasets."""
+    train_dataset, test_dataset = create_datasets(
+        num_train_instances=2,
+        num_test_instances=1,
+        frequencies=[1.0, 3.0, 5.0, 7.0],
+        sampling_rate=1000,
+        duration=1.0,  # Short duration for quick test
+        noise_std=0.1,
+        train_seed=1,
+        test_seed=2
+    )
+    return train_dataset, test_dataset
+
+
+@pytest.fixture
+def model():
+    """Fixture to create a model."""
+    model = FrequencyExtractorLSTM(
+        input_size=5,
+        hidden_size=32,
+        num_layers=1,
+        dropout=0.0,
+        output_size=1
+    )
+    return model
 
 
 def test_data_generation():
@@ -75,12 +105,13 @@ def test_model():
     return model
 
 
-def test_training_loop(model, train_dataset):
+def test_training_loop(model, train_test_datasets):
     """Test a minimal training loop."""
     print("\n" + "=" * 70)
     print("Testing Training Loop")
     print("=" * 70)
-    
+
+    train_dataset, _ = train_test_datasets
     train_loader = DataLoader(train_dataset, batch_size=1, shuffle=False)
     
     criterion = torch.nn.MSELoss()
@@ -166,16 +197,16 @@ def main():
     print("\n" + "=" * 70)
     print("LSTM FREQUENCY EXTRACTION - SYSTEM TEST")
     print("=" * 70 + "\n")
-    
+
     # Test 1: Data generation
     train_dataset, test_dataset = test_data_generation()
-    
+
     # Test 2: Model
-    model = test_model()
-    
+    model_instance = test_model()
+
     # Test 3: Training loop
-    test_training_loop(model, train_dataset)
-    
+    test_training_loop(model_instance, (train_dataset, test_dataset))
+
     # Test 4: State continuity
     test_state_continuity()
     
