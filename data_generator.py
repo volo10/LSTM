@@ -76,7 +76,7 @@ def generate_noisy_signals(
     for i in range(num_instances):
         # Generate random amplitudes and phases for this instance
         amplitudes = np.random.uniform(0.8, 1.2, num_frequencies)
-        phases = np.random.uniform(0, 2 * np.pi, num_frequencies)
+        phases = np.random.uniform(0, 0.2 * np.pi, num_frequencies)
         
         # Generate each frequency component
         for j, freq in enumerate(frequencies):

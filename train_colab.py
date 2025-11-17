@@ -34,7 +34,7 @@ def generate_noisy_signals(num_instances: int, frequencies: List[float],
     clean_components = np.zeros((num_instances, num_frequencies, num_samples))
     for i in range(num_instances):
         amplitudes = np.random.uniform(0.8, 1.2, num_frequencies)
-        phases = np.random.uniform(0, 2 * np.pi, num_frequencies)
+        phases = np.random.uniform(0, 0.2 * np.pi, num_frequencies)
         for j, freq in enumerate(frequencies):
             component = generate_single_sinusoid(freq, amplitudes[j], phases[j],
                                                 sampling_rate, duration)
