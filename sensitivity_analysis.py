@@ -12,22 +12,23 @@ Analysis includes:
 4. Number of LSTM layers (model depth)
 """
 
-import torch
-import torch.nn as nn
-from torch.utils.data import DataLoader
-import numpy as np
 import json
 import time
 from datetime import datetime
 from pathlib import Path
+
 import matplotlib.pyplot as plt
+import numpy as np
+import torch
+import torch.nn as nn
+from torch.utils.data import DataLoader
 from tqdm import tqdm
 
 from data_generator import create_datasets
 from model import FrequencyExtractorLSTM
 
 
-def train_model_quick(model, train_loader, test_loader, config, device='cpu'):
+def train_model_quick(model, train_loader, test_loader, config, device="cpu"):
     """
     Quick training function for sensitivity analysis.
 
@@ -43,9 +44,9 @@ def train_model_quick(model, train_loader, test_loader, config, device='cpu'):
     """
     model = model.to(device)
     criterion = nn.MSELoss()
-    optimizer = torch.optim.Adam(model.parameters(), lr=config['learning_rate'])
+    optimizer = torch.optim.Adam(model.parameters(), lr=config["learning_rate"])
 
-    num_epochs = config.get('num_epochs', 20)  # Reduced for sensitivity analysis
+    num_epochs = config.get("num_epochs", 20)  # Reduced for sensitivity analysis
 
     train_losses = []
     test_losses = []
@@ -100,16 +101,18 @@ def train_model_quick(model, train_loader, test_loader, config, device='cpu'):
         test_losses.append(test_loss)
 
     return {
-        'final_train_loss': train_losses[-1],
-        'final_test_loss': test_losses[-1],
-        'best_test_loss': min(test_losses),
-        'train_losses': train_losses,
-        'test_losses': test_losses,
-        'generalization_ratio': test_losses[-1] / train_losses[-1] if train_losses[-1] > 0 else float('inf')
+        "final_train_loss": train_losses[-1],
+        "final_test_loss": test_losses[-1],
+        "best_test_loss": min(test_losses),
+        "train_losses": train_losses,
+        "test_losses": test_losses,
+        "generalization_ratio": (
+            test_losses[-1] / train_losses[-1] if train_losses[-1] > 0 else float("inf")
+        ),
     }
 
 
-def analyze_hidden_size(base_config, device='cpu'):
+def analyze_hidden_size(base_config, device="cpu"):
     """Analyze impact of LSTM hidden size on performance."""
     print("\n" + "=" * 70)
     print("SENSITIVITY ANALYSIS: Hidden Size")
@@ -123,36 +126,35 @@ def analyze_hidden_size(base_config, device='cpu'):
         start_time = time.time()
 
         # Create datasets
-        train_dataset, test_dataset = create_datasets(**base_config['data'])
+        train_dataset, test_dataset = create_datasets(**base_config["data"])
         train_loader = DataLoader(train_dataset, batch_size=1, shuffle=False)
         test_loader = DataLoader(test_dataset, batch_size=1, shuffle=False)
 
         # Create model
         model = FrequencyExtractorLSTM(
-            input_size=5,
-            hidden_size=hidden_size,
-            num_layers=1,
-            output_size=1
+            input_size=5, hidden_size=hidden_size, num_layers=1, output_size=1
         )
 
         # Train
         train_result = train_model_quick(
-            model, train_loader, test_loader,
-            {'learning_rate': 0.001, 'num_epochs': 20},
-            device
+            model,
+            train_loader,
+            test_loader,
+            {"learning_rate": 0.001, "num_epochs": 20},
+            device,
         )
 
         training_time = time.time() - start_time
         num_params = model.get_num_parameters()
 
         result = {
-            'hidden_size': hidden_size,
-            'num_parameters': num_params,
-            'final_train_mse': train_result['final_train_loss'],
-            'final_test_mse': train_result['final_test_loss'],
-            'best_test_mse': train_result['best_test_loss'],
-            'generalization_ratio': train_result['generalization_ratio'],
-            'training_time_seconds': training_time
+            "hidden_size": hidden_size,
+            "num_parameters": num_params,
+            "final_train_mse": train_result["final_train_loss"],
+            "final_test_mse": train_result["final_test_loss"],
+            "best_test_mse": train_result["best_test_loss"],
+            "generalization_ratio": train_result["generalization_ratio"],
+            "training_time_seconds": training_time,
         }
         results.append(result)
 
@@ -162,10 +164,10 @@ def analyze_hidden_size(base_config, device='cpu'):
         print(f"  Ratio: {result['generalization_ratio']:.4f}")
         print(f"  Time: {training_time:.1f}s")
 
-    return {'parameter': 'hidden_size', 'results': results}
+    return {"parameter": "hidden_size", "results": results}
 
 
-def analyze_learning_rate(base_config, device='cpu'):
+def analyze_learning_rate(base_config, device="cpu"):
     """Analyze impact of learning rate on performance."""
     print("\n" + "=" * 70)
     print("SENSITIVITY ANALYSIS: Learning Rate")
@@ -179,7 +181,7 @@ def analyze_learning_rate(base_config, device='cpu'):
         start_time = time.time()
 
         # Create datasets
-        train_dataset, test_dataset = create_datasets(**base_config['data'])
+        train_dataset, test_dataset = create_datasets(**base_config["data"])
         train_loader = DataLoader(train_dataset, batch_size=1, shuffle=False)
         test_loader = DataLoader(test_dataset, batch_size=1, shuffle=False)
 
@@ -188,21 +190,24 @@ def analyze_learning_rate(base_config, device='cpu'):
 
         # Train
         train_result = train_model_quick(
-            model, train_loader, test_loader,
-            {'learning_rate': lr, 'num_epochs': 20},
-            device
+            model,
+            train_loader,
+            test_loader,
+            {"learning_rate": lr, "num_epochs": 20},
+            device,
         )
 
         training_time = time.time() - start_time
 
         result = {
-            'learning_rate': lr,
-            'final_train_mse': train_result['final_train_loss'],
-            'final_test_mse': train_result['final_test_loss'],
-            'best_test_mse': train_result['best_test_loss'],
-            'generalization_ratio': train_result['generalization_ratio'],
-            'training_time_seconds': training_time,
-            'converged': train_result['final_train_loss'] < 1.0  # Convergence criterion
+            "learning_rate": lr,
+            "final_train_mse": train_result["final_train_loss"],
+            "final_test_mse": train_result["final_test_loss"],
+            "best_test_mse": train_result["best_test_loss"],
+            "generalization_ratio": train_result["generalization_ratio"],
+            "training_time_seconds": training_time,
+            "converged": train_result["final_train_loss"]
+            < 1.0,  # Convergence criterion
         }
         results.append(result)
 
@@ -212,10 +217,10 @@ def analyze_learning_rate(base_config, device='cpu'):
         print(f"  Converged: {result['converged']}")
         print(f"  Time: {training_time:.1f}s")
 
-    return {'parameter': 'learning_rate', 'results': results}
+    return {"parameter": "learning_rate", "results": results}
 
 
-def analyze_noise_level(base_config, device='cpu'):
+def analyze_noise_level(base_config, device="cpu"):
     """Analyze impact of noise level on performance."""
     print("\n" + "=" * 70)
     print("SENSITIVITY ANALYSIS: Noise Level")
@@ -229,8 +234,8 @@ def analyze_noise_level(base_config, device='cpu'):
         start_time = time.time()
 
         # Create datasets with different noise
-        config_with_noise = base_config['data'].copy()
-        config_with_noise['noise_std'] = noise_std
+        config_with_noise = base_config["data"].copy()
+        config_with_noise["noise_std"] = noise_std
 
         train_dataset, test_dataset = create_datasets(**config_with_noise)
         train_loader = DataLoader(train_dataset, batch_size=1, shuffle=False)
@@ -241,20 +246,22 @@ def analyze_noise_level(base_config, device='cpu'):
 
         # Train
         train_result = train_model_quick(
-            model, train_loader, test_loader,
-            {'learning_rate': 0.001, 'num_epochs': 20},
-            device
+            model,
+            train_loader,
+            test_loader,
+            {"learning_rate": 0.001, "num_epochs": 20},
+            device,
         )
 
         training_time = time.time() - start_time
 
         result = {
-            'noise_std': noise_std,
-            'final_train_mse': train_result['final_train_loss'],
-            'final_test_mse': train_result['final_test_loss'],
-            'best_test_mse': train_result['best_test_loss'],
-            'generalization_ratio': train_result['generalization_ratio'],
-            'training_time_seconds': training_time
+            "noise_std": noise_std,
+            "final_train_mse": train_result["final_train_loss"],
+            "final_test_mse": train_result["final_test_loss"],
+            "best_test_mse": train_result["best_test_loss"],
+            "generalization_ratio": train_result["generalization_ratio"],
+            "training_time_seconds": training_time,
         }
         results.append(result)
 
@@ -263,10 +270,10 @@ def analyze_noise_level(base_config, device='cpu'):
         print(f"  Ratio: {result['generalization_ratio']:.4f}")
         print(f"  Time: {training_time:.1f}s")
 
-    return {'parameter': 'noise_std', 'results': results}
+    return {"parameter": "noise_std", "results": results}
 
 
-def analyze_num_layers(base_config, device='cpu'):
+def analyze_num_layers(base_config, device="cpu"):
     """Analyze impact of number of LSTM layers on performance."""
     print("\n" + "=" * 70)
     print("SENSITIVITY ANALYSIS: Number of Layers")
@@ -280,7 +287,7 @@ def analyze_num_layers(base_config, device='cpu'):
         start_time = time.time()
 
         # Create datasets
-        train_dataset, test_dataset = create_datasets(**base_config['data'])
+        train_dataset, test_dataset = create_datasets(**base_config["data"])
         train_loader = DataLoader(train_dataset, batch_size=1, shuffle=False)
         test_loader = DataLoader(test_dataset, batch_size=1, shuffle=False)
 
@@ -289,27 +296,29 @@ def analyze_num_layers(base_config, device='cpu'):
             input_size=5,
             hidden_size=64,
             num_layers=num_layers,
-            dropout=0.1 if num_layers > 1 else 0.0
+            dropout=0.1 if num_layers > 1 else 0.0,
         )
 
         # Train
         train_result = train_model_quick(
-            model, train_loader, test_loader,
-            {'learning_rate': 0.001, 'num_epochs': 20},
-            device
+            model,
+            train_loader,
+            test_loader,
+            {"learning_rate": 0.001, "num_epochs": 20},
+            device,
         )
 
         training_time = time.time() - start_time
         num_params = model.get_num_parameters()
 
         result = {
-            'num_layers': num_layers,
-            'num_parameters': num_params,
-            'final_train_mse': train_result['final_train_loss'],
-            'final_test_mse': train_result['final_test_loss'],
-            'best_test_mse': train_result['best_test_loss'],
-            'generalization_ratio': train_result['generalization_ratio'],
-            'training_time_seconds': training_time
+            "num_layers": num_layers,
+            "num_parameters": num_params,
+            "final_train_mse": train_result["final_train_loss"],
+            "final_test_mse": train_result["final_test_loss"],
+            "best_test_mse": train_result["best_test_loss"],
+            "generalization_ratio": train_result["generalization_ratio"],
+            "training_time_seconds": training_time,
         }
         results.append(result)
 
@@ -319,75 +328,75 @@ def analyze_num_layers(base_config, device='cpu'):
         print(f"  Ratio: {result['generalization_ratio']:.4f}")
         print(f"  Time: {training_time:.1f}s")
 
-    return {'parameter': 'num_layers', 'results': results}
+    return {"parameter": "num_layers", "results": results}
 
 
-def plot_sensitivity_results(all_results, output_dir='outputs/plots'):
+def plot_sensitivity_results(all_results, output_dir="outputs/plots"):
     """Create visualizations for sensitivity analysis results."""
     Path(output_dir).mkdir(parents=True, exist_ok=True)
 
     fig, axes = plt.subplots(2, 2, figsize=(15, 12))
-    fig.suptitle('Parameter Sensitivity Analysis', fontsize=16, fontweight='bold')
+    fig.suptitle("Parameter Sensitivity Analysis", fontsize=16, fontweight="bold")
 
     # Plot 1: Hidden Size
     ax = axes[0, 0]
-    data = all_results['hidden_size']['results']
-    x = [r['hidden_size'] for r in data]
-    train_mse = [r['final_train_mse'] for r in data]
-    test_mse = [r['final_test_mse'] for r in data]
+    data = all_results["hidden_size"]["results"]
+    x = [r["hidden_size"] for r in data]
+    train_mse = [r["final_train_mse"] for r in data]
+    test_mse = [r["final_test_mse"] for r in data]
 
-    ax.plot(x, train_mse, 'o-', label='Train MSE', linewidth=2, markersize=8)
-    ax.plot(x, test_mse, 's-', label='Test MSE', linewidth=2, markersize=8)
-    ax.set_xlabel('Hidden Size', fontsize=12, fontweight='bold')
-    ax.set_ylabel('MSE', fontsize=12, fontweight='bold')
-    ax.set_title('Impact of Hidden Size', fontsize=13, fontweight='bold')
+    ax.plot(x, train_mse, "o-", label="Train MSE", linewidth=2, markersize=8)
+    ax.plot(x, test_mse, "s-", label="Test MSE", linewidth=2, markersize=8)
+    ax.set_xlabel("Hidden Size", fontsize=12, fontweight="bold")
+    ax.set_ylabel("MSE", fontsize=12, fontweight="bold")
+    ax.set_title("Impact of Hidden Size", fontsize=13, fontweight="bold")
     ax.legend()
     ax.grid(True, alpha=0.3)
-    ax.set_xscale('log', base=2)
+    ax.set_xscale("log", base=2)
 
     # Plot 2: Learning Rate
     ax = axes[0, 1]
-    data = all_results['learning_rate']['results']
-    x = [r['learning_rate'] for r in data]
-    train_mse = [r['final_train_mse'] for r in data]
-    test_mse = [r['final_test_mse'] for r in data]
+    data = all_results["learning_rate"]["results"]
+    x = [r["learning_rate"] for r in data]
+    train_mse = [r["final_train_mse"] for r in data]
+    test_mse = [r["final_test_mse"] for r in data]
 
-    ax.plot(x, train_mse, 'o-', label='Train MSE', linewidth=2, markersize=8)
-    ax.plot(x, test_mse, 's-', label='Test MSE', linewidth=2, markersize=8)
-    ax.set_xlabel('Learning Rate', fontsize=12, fontweight='bold')
-    ax.set_ylabel('MSE', fontsize=12, fontweight='bold')
-    ax.set_title('Impact of Learning Rate', fontsize=13, fontweight='bold')
+    ax.plot(x, train_mse, "o-", label="Train MSE", linewidth=2, markersize=8)
+    ax.plot(x, test_mse, "s-", label="Test MSE", linewidth=2, markersize=8)
+    ax.set_xlabel("Learning Rate", fontsize=12, fontweight="bold")
+    ax.set_ylabel("MSE", fontsize=12, fontweight="bold")
+    ax.set_title("Impact of Learning Rate", fontsize=13, fontweight="bold")
     ax.legend()
     ax.grid(True, alpha=0.3)
-    ax.set_xscale('log')
+    ax.set_xscale("log")
 
     # Plot 3: Noise Level
     ax = axes[1, 0]
-    data = all_results['noise_std']['results']
-    x = [r['noise_std'] for r in data]
-    train_mse = [r['final_train_mse'] for r in data]
-    test_mse = [r['final_test_mse'] for r in data]
+    data = all_results["noise_std"]["results"]
+    x = [r["noise_std"] for r in data]
+    train_mse = [r["final_train_mse"] for r in data]
+    test_mse = [r["final_test_mse"] for r in data]
 
-    ax.plot(x, train_mse, 'o-', label='Train MSE', linewidth=2, markersize=8)
-    ax.plot(x, test_mse, 's-', label='Test MSE', linewidth=2, markersize=8)
-    ax.set_xlabel('Noise Standard Deviation', fontsize=12, fontweight='bold')
-    ax.set_ylabel('MSE', fontsize=12, fontweight='bold')
-    ax.set_title('Impact of Noise Level', fontsize=13, fontweight='bold')
+    ax.plot(x, train_mse, "o-", label="Train MSE", linewidth=2, markersize=8)
+    ax.plot(x, test_mse, "s-", label="Test MSE", linewidth=2, markersize=8)
+    ax.set_xlabel("Noise Standard Deviation", fontsize=12, fontweight="bold")
+    ax.set_ylabel("MSE", fontsize=12, fontweight="bold")
+    ax.set_title("Impact of Noise Level", fontsize=13, fontweight="bold")
     ax.legend()
     ax.grid(True, alpha=0.3)
 
     # Plot 4: Number of Layers
     ax = axes[1, 1]
-    data = all_results['num_layers']['results']
-    x = [r['num_layers'] for r in data]
-    train_mse = [r['final_train_mse'] for r in data]
-    test_mse = [r['final_test_mse'] for r in data]
+    data = all_results["num_layers"]["results"]
+    x = [r["num_layers"] for r in data]
+    train_mse = [r["final_train_mse"] for r in data]
+    test_mse = [r["final_test_mse"] for r in data]
 
-    ax.plot(x, train_mse, 'o-', label='Train MSE', linewidth=2, markersize=8)
-    ax.plot(x, test_mse, 's-', label='Test MSE', linewidth=2, markersize=8)
-    ax.set_xlabel('Number of LSTM Layers', fontsize=12, fontweight='bold')
-    ax.set_ylabel('MSE', fontsize=12, fontweight='bold')
-    ax.set_title('Impact of Model Depth', fontsize=13, fontweight='bold')
+    ax.plot(x, train_mse, "o-", label="Train MSE", linewidth=2, markersize=8)
+    ax.plot(x, test_mse, "s-", label="Test MSE", linewidth=2, markersize=8)
+    ax.set_xlabel("Number of LSTM Layers", fontsize=12, fontweight="bold")
+    ax.set_ylabel("MSE", fontsize=12, fontweight="bold")
+    ax.set_title("Impact of Model Depth", fontsize=13, fontweight="bold")
     ax.legend()
     ax.grid(True, alpha=0.3)
     ax.set_xticks(x)
@@ -395,8 +404,8 @@ def plot_sensitivity_results(all_results, output_dir='outputs/plots'):
     plt.tight_layout()
 
     # Save plot
-    output_path = Path(output_dir) / 'sensitivity_analysis.png'
-    plt.savefig(output_path, dpi=150, bbox_inches='tight')
+    output_path = Path(output_dir) / "sensitivity_analysis.png"
+    plt.savefig(output_path, dpi=150, bbox_inches="tight")
     print(f"\n✓ Sensitivity analysis plot saved to: {output_path}")
     plt.close()
 
@@ -412,47 +421,51 @@ def main():
 
     # Base configuration
     base_config = {
-        'data': {
-            'num_train_instances': 1,
-            'num_test_instances': 1,
-            'frequencies': [1.0, 3.0, 5.0, 7.0],
-            'sampling_rate': 1000,
-            'duration': 10.0,
-            'noise_std': 0.1,
-            'train_seed': 1,
-            'test_seed': 2,
-            'signal_seed': 42
+        "data": {
+            "num_train_instances": 1,
+            "num_test_instances": 1,
+            "frequencies": [1.0, 3.0, 5.0, 7.0],
+            "sampling_rate": 1000,
+            "duration": 10.0,
+            "noise_std": 0.1,
+            "train_seed": 1,
+            "test_seed": 2,
+            "signal_seed": 42,
         }
     }
 
     # Detect device
-    device = 'cuda' if torch.cuda.is_available() else 'cpu'
+    device = "cuda" if torch.cuda.is_available() else "cpu"
     print(f"\nUsing device: {device}")
 
     # Run all analyses
     all_results = {}
     start_time = time.time()
 
-    all_results['hidden_size'] = analyze_hidden_size(base_config, device)
-    all_results['learning_rate'] = analyze_learning_rate(base_config, device)
-    all_results['noise_std'] = analyze_noise_level(base_config, device)
-    all_results['num_layers'] = analyze_num_layers(base_config, device)
+    all_results["hidden_size"] = analyze_hidden_size(base_config, device)
+    all_results["learning_rate"] = analyze_learning_rate(base_config, device)
+    all_results["noise_std"] = analyze_noise_level(base_config, device)
+    all_results["num_layers"] = analyze_num_layers(base_config, device)
 
     total_time = time.time() - start_time
 
     # Save results
-    output_dir = Path('outputs/results')
+    output_dir = Path("outputs/results")
     output_dir.mkdir(parents=True, exist_ok=True)
 
-    results_file = output_dir / 'sensitivity_analysis.json'
-    with open(results_file, 'w') as f:
-        json.dump({
-            'timestamp': datetime.now().isoformat(),
-            'total_time_seconds': total_time,
-            'base_config': base_config,
-            'device': device,
-            'results': all_results
-        }, f, indent=2)
+    results_file = output_dir / "sensitivity_analysis.json"
+    with open(results_file, "w") as f:
+        json.dump(
+            {
+                "timestamp": datetime.now().isoformat(),
+                "total_time_seconds": total_time,
+                "base_config": base_config,
+                "device": device,
+                "results": all_results,
+            },
+            f,
+            indent=2,
+        )
 
     print(f"\n✓ Results saved to: {results_file}")
 
@@ -465,10 +478,18 @@ def main():
     print("=" * 70)
     print(f"\nTotal analysis time: {total_time/60:.1f} minutes")
     print("\nKey Findings:")
-    print(f"  • Hidden Size: Best performance with {all_results['hidden_size']['results'][2]['hidden_size']} units")
-    print(f"  • Learning Rate: Optimal around {all_results['learning_rate']['results'][2]['learning_rate']}")
-    print(f"  • Noise Robustness: Model handles noise up to {base_config['data']['noise_std']}")
-    print(f"  • Model Depth: {all_results['num_layers']['results'][0]['num_layers']} layer(s) sufficient")
+    print(
+        f"  • Hidden Size: Best performance with {all_results['hidden_size']['results'][2]['hidden_size']} units"
+    )
+    print(
+        f"  • Learning Rate: Optimal around {all_results['learning_rate']['results'][2]['learning_rate']}"
+    )
+    print(
+        f"  • Noise Robustness: Model handles noise up to {base_config['data']['noise_std']}"
+    )
+    print(
+        f"  • Model Depth: {all_results['num_layers']['results'][0]['num_layers']} layer(s) sufficient"
+    )
     print("\n" + "=" * 70)
 
 

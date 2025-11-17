@@ -4,11 +4,13 @@ Create the specific plots requested in the assignment:
 2. Separate plots for each frequency comparing Target vs Predicted
 """
 
-import numpy as np
 import matplotlib
-matplotlib.use('Agg')  # Use non-interactive backend
-import matplotlib.pyplot as plt
+import numpy as np
+
+matplotlib.use("Agg")  # Use non-interactive backend
 import os
+
+import matplotlib.pyplot as plt
 
 
 def create_f2_overlay_plot(
@@ -18,7 +20,7 @@ def create_f2_overlay_plot(
     frequencies: np.ndarray,
     sampling_rate: int = 1000,
     time_window: float = 2.0,
-    save_path: str = None
+    save_path: str = None,
 ):
     """
     Create overlay plot for f₂ showing:
@@ -46,28 +48,49 @@ def create_f2_overlay_plot(
     plt.figure(figsize=(16, 8))
 
     # Plot all three signals
-    plt.plot(t, target_components[f2_idx, :num_samples_to_show],
-             'b-', label=f'Target (Pure {f2_freq} Hz)', linewidth=2.5, alpha=0.8)
-    plt.plot(t, mixed_signal[:num_samples_to_show],
-             'gray', label='Noisy Mixed Signal S(t)', linewidth=1.5, alpha=0.5)
-    plt.plot(t, predicted_components[f2_idx, :num_samples_to_show],
-             'r--', label=f'LSTM Output ({f2_freq} Hz)', linewidth=2, alpha=0.8)
+    plt.plot(
+        t,
+        target_components[f2_idx, :num_samples_to_show],
+        "b-",
+        label=f"Target (Pure {f2_freq} Hz)",
+        linewidth=2.5,
+        alpha=0.8,
+    )
+    plt.plot(
+        t,
+        mixed_signal[:num_samples_to_show],
+        "gray",
+        label="Noisy Mixed Signal S(t)",
+        linewidth=1.5,
+        alpha=0.5,
+    )
+    plt.plot(
+        t,
+        predicted_components[f2_idx, :num_samples_to_show],
+        "r--",
+        label=f"LSTM Output ({f2_freq} Hz)",
+        linewidth=2,
+        alpha=0.8,
+    )
 
     # Calculate MSE for this component
     mse = np.mean((predicted_components[f2_idx] - target_components[f2_idx]) ** 2)
 
-    plt.title(f'Overlay Plot for f₂ = {f2_freq} Hz (MSE: {mse:.6f})',
-              fontsize=16, fontweight='bold')
-    plt.xlabel('Time (seconds)', fontsize=14)
-    plt.ylabel('Amplitude', fontsize=14)
-    plt.legend(fontsize=12, loc='upper right')
+    plt.title(
+        f"Overlay Plot for f₂ = {f2_freq} Hz (MSE: {mse:.6f})",
+        fontsize=16,
+        fontweight="bold",
+    )
+    plt.xlabel("Time (seconds)", fontsize=14)
+    plt.ylabel("Amplitude", fontsize=14)
+    plt.legend(fontsize=12, loc="upper right")
     plt.grid(True, alpha=0.3)
     plt.xlim([0, time_window])
 
     plt.tight_layout()
 
     if save_path:
-        plt.savefig(save_path, dpi=300, bbox_inches='tight')
+        plt.savefig(save_path, dpi=300, bbox_inches="tight")
         print(f"[SAVED] f2 overlay plot saved to: {save_path}")
 
     plt.close()
@@ -79,7 +102,7 @@ def create_per_frequency_plots(
     frequencies: np.ndarray,
     sampling_rate: int = 1000,
     time_window: float = 2.0,
-    save_path: str = None
+    save_path: str = None,
 ):
     """
     Create separate plots for each frequency (f₁–f₄) comparing Target vs Predicted.
@@ -104,24 +127,39 @@ def create_per_frequency_plots(
         mse = np.mean((predicted_components[i] - target_components[i]) ** 2)
 
         # Plot target and predicted
-        axes[i].plot(t, target_components[i, :num_samples_to_show],
-                    'b-', label='Target (Ground Truth)', linewidth=2.5, alpha=0.7)
-        axes[i].plot(t, predicted_components[i, :num_samples_to_show],
-                    'r--', label='LSTM Predicted', linewidth=2, alpha=0.8)
+        axes[i].plot(
+            t,
+            target_components[i, :num_samples_to_show],
+            "b-",
+            label="Target (Ground Truth)",
+            linewidth=2.5,
+            alpha=0.7,
+        )
+        axes[i].plot(
+            t,
+            predicted_components[i, :num_samples_to_show],
+            "r--",
+            label="LSTM Predicted",
+            linewidth=2,
+            alpha=0.8,
+        )
 
-        axes[i].set_title(f'f{i+1} = {freq} Hz - Target vs Predicted (MSE: {mse:.6f})',
-                         fontsize=13, fontweight='bold')
-        axes[i].set_ylabel('Amplitude', fontsize=11)
-        axes[i].legend(loc='upper right', fontsize=10)
+        axes[i].set_title(
+            f"f{i+1} = {freq} Hz - Target vs Predicted (MSE: {mse:.6f})",
+            fontsize=13,
+            fontweight="bold",
+        )
+        axes[i].set_ylabel("Amplitude", fontsize=11)
+        axes[i].legend(loc="upper right", fontsize=10)
         axes[i].grid(True, alpha=0.3)
         axes[i].set_xlim([0, time_window])
 
-    axes[-1].set_xlabel('Time (seconds)', fontsize=12)
+    axes[-1].set_xlabel("Time (seconds)", fontsize=12)
 
     plt.tight_layout()
 
     if save_path:
-        plt.savefig(save_path, dpi=300, bbox_inches='tight')
+        plt.savefig(save_path, dpi=300, bbox_inches="tight")
         print(f"[SAVED] Per-frequency comparison plots saved to: {save_path}")
 
     plt.close()
@@ -134,7 +172,7 @@ def create_extended_overlay_plot(
     frequencies: np.ndarray,
     sampling_rate: int = 1000,
     time_window: float = 5.0,
-    save_path: str = None
+    save_path: str = None,
 ):
     """
     Create an extended overlay plot for f₂ with longer time window.
@@ -148,39 +186,71 @@ def create_extended_overlay_plot(
     fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(16, 10))
 
     # Top plot: All three signals
-    ax1.plot(t, target_components[f2_idx, :num_samples_to_show],
-             'b-', label=f'Target (Pure {f2_freq} Hz)', linewidth=2.5, alpha=0.8)
-    ax1.plot(t, mixed_signal[:num_samples_to_show],
-             'gray', label='Noisy Mixed Signal S(t)', linewidth=1.5, alpha=0.5)
-    ax1.plot(t, predicted_components[f2_idx, :num_samples_to_show],
-             'r--', label=f'LSTM Output ({f2_freq} Hz)', linewidth=2, alpha=0.8)
+    ax1.plot(
+        t,
+        target_components[f2_idx, :num_samples_to_show],
+        "b-",
+        label=f"Target (Pure {f2_freq} Hz)",
+        linewidth=2.5,
+        alpha=0.8,
+    )
+    ax1.plot(
+        t,
+        mixed_signal[:num_samples_to_show],
+        "gray",
+        label="Noisy Mixed Signal S(t)",
+        linewidth=1.5,
+        alpha=0.5,
+    )
+    ax1.plot(
+        t,
+        predicted_components[f2_idx, :num_samples_to_show],
+        "r--",
+        label=f"LSTM Output ({f2_freq} Hz)",
+        linewidth=2,
+        alpha=0.8,
+    )
 
     mse = np.mean((predicted_components[f2_idx] - target_components[f2_idx]) ** 2)
-    ax1.set_title(f'Extended View: f₂ = {f2_freq} Hz (MSE: {mse:.6f})',
-                  fontsize=14, fontweight='bold')
-    ax1.set_ylabel('Amplitude', fontsize=12)
-    ax1.legend(fontsize=11, loc='upper right')
+    ax1.set_title(
+        f"Extended View: f₂ = {f2_freq} Hz (MSE: {mse:.6f})",
+        fontsize=14,
+        fontweight="bold",
+    )
+    ax1.set_ylabel("Amplitude", fontsize=12)
+    ax1.legend(fontsize=11, loc="upper right")
     ax1.grid(True, alpha=0.3)
     ax1.set_xlim([0, time_window])
 
     # Bottom plot: Target vs LSTM output only (clearer comparison)
-    ax2.plot(t, target_components[f2_idx, :num_samples_to_show],
-             'b-', label=f'Target (Pure {f2_freq} Hz)', linewidth=2.5, alpha=0.8)
-    ax2.plot(t, predicted_components[f2_idx, :num_samples_to_show],
-             'r--', label=f'LSTM Output ({f2_freq} Hz)', linewidth=2, alpha=0.8)
+    ax2.plot(
+        t,
+        target_components[f2_idx, :num_samples_to_show],
+        "b-",
+        label=f"Target (Pure {f2_freq} Hz)",
+        linewidth=2.5,
+        alpha=0.8,
+    )
+    ax2.plot(
+        t,
+        predicted_components[f2_idx, :num_samples_to_show],
+        "r--",
+        label=f"LSTM Output ({f2_freq} Hz)",
+        linewidth=2,
+        alpha=0.8,
+    )
 
-    ax2.set_title(f'Target vs LSTM Output Comparison',
-                  fontsize=14, fontweight='bold')
-    ax2.set_xlabel('Time (seconds)', fontsize=12)
-    ax2.set_ylabel('Amplitude', fontsize=12)
-    ax2.legend(fontsize=11, loc='upper right')
+    ax2.set_title(f"Target vs LSTM Output Comparison", fontsize=14, fontweight="bold")
+    ax2.set_xlabel("Time (seconds)", fontsize=12)
+    ax2.set_ylabel("Amplitude", fontsize=12)
+    ax2.legend(fontsize=11, loc="upper right")
     ax2.grid(True, alpha=0.3)
     ax2.set_xlim([0, time_window])
 
     plt.tight_layout()
 
     if save_path:
-        plt.savefig(save_path, dpi=300, bbox_inches='tight')
+        plt.savefig(save_path, dpi=300, bbox_inches="tight")
         print(f"[SAVED] Extended f2 overlay plot saved to: {save_path}")
 
     plt.close()
@@ -193,7 +263,7 @@ def main():
     print("=" * 70)
 
     # Load data
-    data_path = 'outputs/results/reconstructed_signals.npz'
+    data_path = "outputs/results/reconstructed_signals.npz"
 
     if not os.path.exists(data_path):
         print(f"Error: Data file not found: {data_path}")
@@ -203,17 +273,17 @@ def main():
     print(f"\nLoading data from: {data_path}")
     data = np.load(data_path)
 
-    mixed_signal = data['mixed_signal']
-    predicted_components = data['predicted_components']
-    target_components = data['target_components']
-    frequencies = data['frequencies']
+    mixed_signal = data["mixed_signal"]
+    predicted_components = data["predicted_components"]
+    target_components = data["target_components"]
+    frequencies = data["frequencies"]
 
     print(f"  - Mixed signal shape: {mixed_signal.shape}")
     print(f"  - Predicted components shape: {predicted_components.shape}")
     print(f"  - Frequencies: {frequencies}")
 
     # Create output directory
-    output_dir = 'outputs/plots/assignment'
+    output_dir = "outputs/plots/assignment"
     os.makedirs(output_dir, exist_ok=True)
     print(f"\nSaving plots to: {output_dir}")
 
@@ -226,7 +296,7 @@ def main():
         target_components,
         frequencies,
         time_window=2.0,
-        save_path=os.path.join(output_dir, 'f2_overlay_2sec.png')
+        save_path=os.path.join(output_dir, "f2_overlay_2sec.png"),
     )
 
     print("\n" + "=" * 70)
@@ -238,7 +308,7 @@ def main():
         target_components,
         frequencies,
         time_window=5.0,
-        save_path=os.path.join(output_dir, 'f2_overlay_5sec.png')
+        save_path=os.path.join(output_dir, "f2_overlay_5sec.png"),
     )
 
     print("\n" + "=" * 70)
@@ -249,7 +319,7 @@ def main():
         target_components,
         frequencies,
         time_window=2.0,
-        save_path=os.path.join(output_dir, 'all_frequencies_comparison.png')
+        save_path=os.path.join(output_dir, "all_frequencies_comparison.png"),
     )
 
     print("\n" + "=" * 70)

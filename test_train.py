@@ -10,18 +10,19 @@ Tests training functionality including:
 - Logging
 """
 
+import json
+import tempfile
+from pathlib import Path
+from unittest.mock import MagicMock, Mock, patch
+
+import numpy as np
+import pytest
 import torch
 import torch.nn as nn
 from torch.utils.data import DataLoader, TensorDataset
-import pytest
-import tempfile
-import json
-from pathlib import Path
-from unittest.mock import Mock, patch, MagicMock
-import numpy as np
 
-from model import FrequencyExtractorLSTM
 from data_generator import create_datasets
+from model import FrequencyExtractorLSTM
 
 
 class TestTrainingUtilities:
@@ -35,20 +36,19 @@ class TestTrainingUtilities:
             save_path = Path(tmpdir) / "test_model.pth"
 
             # Save checkpoint
-            torch.save({
-                'model_state_dict': model.state_dict(),
-                'epoch': 10,
-                'loss': 0.5
-            }, save_path)
+            torch.save(
+                {"model_state_dict": model.state_dict(), "epoch": 10, "loss": 0.5},
+                save_path,
+            )
 
             # Verify file exists
             assert save_path.exists()
 
             # Load and verify
             checkpoint = torch.load(save_path)
-            assert checkpoint['epoch'] == 10
-            assert checkpoint['loss'] == 0.5
-            assert 'model_state_dict' in checkpoint
+            assert checkpoint["epoch"] == 10
+            assert checkpoint["loss"] == 0.5
+            assert "model_state_dict" in checkpoint
 
     def test_load_checkpoint(self):
         """Test model checkpoint loading"""
@@ -61,7 +61,9 @@ class TestTrainingUtilities:
             torch.save(model.state_dict(), save_path)
 
             # Load into new model
-            new_model = FrequencyExtractorLSTM(input_size=5, hidden_size=16, num_layers=1)
+            new_model = FrequencyExtractorLSTM(
+                input_size=5, hidden_size=16, num_layers=1
+            )
             new_model.load_state_dict(torch.load(save_path))
 
             # Verify parameters match
@@ -99,7 +101,7 @@ class TestTrainingLoop:
         inputs, targets, instance_ids = next(iter(dataloader))
 
         # Forward pass
-        model.reset_hidden_state(batch_size=1, device='cpu')
+        model.reset_hidden_state(batch_size=1, device="cpu")
         outputs = model(inputs, reset_state=False)
         loss = criterion(outputs, targets)
 
@@ -126,7 +128,7 @@ class TestTrainingLoop:
         for inputs, targets, instance_ids in dataloader:
             # Reset state when moving to new instance
             if prev_instance_id == -1 or instance_ids[0].item() != prev_instance_id:
-                model.reset_hidden_state(batch_size=1, device='cpu')
+                model.reset_hidden_state(batch_size=1, device="cpu")
                 prev_instance_id = instance_ids[0].item()
 
             # Training step
@@ -162,7 +164,7 @@ class TestTrainingLoop:
             for inputs, targets, instance_ids in dataloader:
                 # Reset state when moving to new instance
                 if prev_instance_id == -1 or instance_ids[0].item() != prev_instance_id:
-                    model.reset_hidden_state(batch_size=1, device='cpu')
+                    model.reset_hidden_state(batch_size=1, device="cpu")
                     prev_instance_id = instance_ids[0].item()
 
                 outputs = model(inputs, reset_state=False)
@@ -208,7 +210,7 @@ class TestEarlyStopping:
     def test_early_stopping_improvement(self):
         """Test early stopping tracks improvement"""
         patience = 3
-        best_loss = float('inf')
+        best_loss = float("inf")
         epochs_without_improvement = 0
         stopped = False
 
@@ -234,7 +236,7 @@ class TestEarlyStopping:
     def test_early_stopping_trigger(self):
         """Test early stopping triggers when no improvement"""
         patience = 3
-        best_loss = float('inf')
+        best_loss = float("inf")
         epochs_without_improvement = 0
         stopped = False
 
@@ -264,17 +266,17 @@ class TestLearningRateScheduling:
         model = FrequencyExtractorLSTM(input_size=5, hidden_size=16, num_layers=1)
         optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
         scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
-            optimizer, mode='min', factor=0.5, patience=2
+            optimizer, mode="min", factor=0.5, patience=2
         )
 
-        initial_lr = optimizer.param_groups[0]['lr']
+        initial_lr = optimizer.param_groups[0]["lr"]
 
         # Simulate losses that don't improve
         losses = [1.0, 1.0, 1.0, 1.0]
         for loss in losses:
             scheduler.step(loss)
 
-        final_lr = optimizer.param_groups[0]['lr']
+        final_lr = optimizer.param_groups[0]["lr"]
 
         # Learning rate should have been reduced
         assert final_lr < initial_lr
@@ -285,17 +287,17 @@ class TestLearningRateScheduling:
         model = FrequencyExtractorLSTM(input_size=5, hidden_size=16, num_layers=1)
         optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
         scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
-            optimizer, mode='min', factor=0.5, patience=2
+            optimizer, mode="min", factor=0.5, patience=2
         )
 
-        initial_lr = optimizer.param_groups[0]['lr']
+        initial_lr = optimizer.param_groups[0]["lr"]
 
         # Simulate improving losses
         losses = [1.0, 0.9, 0.8, 0.7]
         for loss in losses:
             scheduler.step(loss)
 
-        final_lr = optimizer.param_groups[0]['lr']
+        final_lr = optimizer.param_groups[0]["lr"]
 
         # Learning rate should not change
         assert final_lr == initial_lr
@@ -306,48 +308,44 @@ class TestLogging:
 
     def test_history_logging(self):
         """Test training history is logged correctly"""
-        history = {
-            'train_losses': [],
-            'test_losses': [],
-            'learning_rates': []
-        }
+        history = {"train_losses": [], "test_losses": [], "learning_rates": []}
 
         # Simulate epochs
         for epoch in range(5):
-            history['train_losses'].append(1.0 - epoch * 0.1)
-            history['test_losses'].append(1.0 - epoch * 0.08)
-            history['learning_rates'].append(0.001)
+            history["train_losses"].append(1.0 - epoch * 0.1)
+            history["test_losses"].append(1.0 - epoch * 0.08)
+            history["learning_rates"].append(0.001)
 
         # Verify history structure
-        assert len(history['train_losses']) == 5
-        assert len(history['test_losses']) == 5
-        assert len(history['learning_rates']) == 5
+        assert len(history["train_losses"]) == 5
+        assert len(history["test_losses"]) == 5
+        assert len(history["learning_rates"]) == 5
 
         # Verify losses decrease
-        assert history['train_losses'][-1] < history['train_losses'][0]
-        assert history['test_losses'][-1] < history['test_losses'][0]
+        assert history["train_losses"][-1] < history["train_losses"][0]
+        assert history["test_losses"][-1] < history["test_losses"][0]
 
     def test_save_training_history(self):
         """Test saving training history to JSON"""
         history = {
-            'config': {'lr': 0.001, 'epochs': 10},
-            'train_losses': [1.0, 0.9, 0.8],
-            'test_losses': [1.1, 1.0, 0.9]
+            "config": {"lr": 0.001, "epochs": 10},
+            "train_losses": [1.0, 0.9, 0.8],
+            "test_losses": [1.1, 1.0, 0.9],
         }
 
         with tempfile.TemporaryDirectory() as tmpdir:
             save_path = Path(tmpdir) / "history.json"
 
             # Save history
-            with open(save_path, 'w') as f:
+            with open(save_path, "w") as f:
                 json.dump(history, f, indent=2)
 
             # Load and verify
-            with open(save_path, 'r') as f:
+            with open(save_path, "r") as f:
                 loaded_history = json.load(f)
 
-            assert loaded_history['config']['lr'] == 0.001
-            assert len(loaded_history['train_losses']) == 3
+            assert loaded_history["config"]["lr"] == 0.001
+            assert len(loaded_history["train_losses"]) == 3
 
 
 class TestEndToEndTraining:
@@ -364,7 +362,7 @@ class TestEndToEndTraining:
             duration=0.5,  # 50 samples
             noise_std=0.1,
             train_seed=1,
-            test_seed=2
+            test_seed=2,
         )
 
         train_loader = DataLoader(train_dataset, batch_size=1, shuffle=False)
@@ -377,7 +375,7 @@ class TestEndToEndTraining:
 
         # Training loop
         num_epochs = 3
-        history = {'train_losses': [], 'test_losses': []}
+        history = {"train_losses": [], "test_losses": []}
 
         for epoch in range(num_epochs):
             # Train
@@ -400,7 +398,7 @@ class TestEndToEndTraining:
                 train_loss += loss.item()
 
             train_loss /= len(train_loader)
-            history['train_losses'].append(train_loss)
+            history["train_losses"].append(train_loss)
 
             # Validate
             model.eval()
@@ -409,7 +407,10 @@ class TestEndToEndTraining:
 
             with torch.no_grad():
                 for inputs, targets, instance_ids in test_loader:
-                    if prev_instance_id == -1 or instance_ids[0].item() != prev_instance_id:
+                    if (
+                        prev_instance_id == -1
+                        or instance_ids[0].item() != prev_instance_id
+                    ):
                         model.reset_hidden_state(batch_size=1)
                         prev_instance_id = instance_ids[0].item()
 
@@ -418,18 +419,18 @@ class TestEndToEndTraining:
                     test_loss += loss.item()
 
             test_loss /= len(test_loader)
-            history['test_losses'].append(test_loss)
+            history["test_losses"].append(test_loss)
 
         # Verify training completed
-        assert len(history['train_losses']) == num_epochs
-        assert len(history['test_losses']) == num_epochs
+        assert len(history["train_losses"]) == num_epochs
+        assert len(history["test_losses"]) == num_epochs
 
         # Verify losses are reasonable
-        assert all(loss >= 0 for loss in history['train_losses'])
-        assert all(loss >= 0 for loss in history['test_losses'])
+        assert all(loss >= 0 for loss in history["train_losses"])
+        assert all(loss >= 0 for loss in history["test_losses"])
 
         # Verify losses decreased (learning happened)
-        assert history['train_losses'][-1] < history['train_losses'][0]
+        assert history["train_losses"][-1] < history["train_losses"][0]
 
 
 class TestRobustness:
@@ -437,19 +438,19 @@ class TestRobustness:
 
     def test_nan_loss_detection(self):
         """Test detection of NaN losses"""
-        loss_value = float('nan')
+        loss_value = float("nan")
         assert np.isnan(loss_value)
 
     def test_inf_loss_detection(self):
         """Test detection of infinite losses"""
-        loss_value = float('inf')
+        loss_value = float("inf")
         assert np.isinf(loss_value)
 
     def test_device_handling(self):
         """Test proper device handling (CPU/GPU)"""
         model = FrequencyExtractorLSTM(input_size=5, hidden_size=16, num_layers=1)
 
-        device = 'cuda' if torch.cuda.is_available() else 'cpu'
+        device = "cuda" if torch.cuda.is_available() else "cpu"
         model = model.to(device)
 
         # Verify model is on correct device
@@ -457,7 +458,9 @@ class TestRobustness:
 
     def test_empty_dataset_handling(self):
         """Test handling of empty datasets"""
-        empty_dataset = TensorDataset(torch.empty(0, 5), torch.empty(0, 1), torch.empty(0, dtype=torch.long))
+        empty_dataset = TensorDataset(
+            torch.empty(0, 5), torch.empty(0, 1), torch.empty(0, dtype=torch.long)
+        )
         dataloader = DataLoader(empty_dataset, batch_size=1)
 
         # Should handle empty dataloader gracefully

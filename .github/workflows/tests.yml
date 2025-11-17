@@ -63,4 +63,4 @@ jobs:
 
     - name: Check import sorting
       run: |
-        isort --check-only .
+        isort --profile black --check-only .

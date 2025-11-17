@@ -4,10 +4,10 @@ Extended edge case tests for model.py to increase coverage
 Tests additional model functionality and edge cases.
 """
 
+import numpy as np
+import pytest
 import torch
 import torch.nn as nn
-import pytest
-import numpy as np
 
 from model import FrequencyExtractorLSTM
 
@@ -18,10 +18,7 @@ class TestModelEdgeCases:
     def test_model_with_dropout(self):
         """Test model with dropout enabled"""
         model = FrequencyExtractorLSTM(
-            input_size=5,
-            hidden_size=32,
-            num_layers=2,
-            dropout=0.5
+            input_size=5, hidden_size=32, num_layers=2, dropout=0.5
         )
 
         # Dropout should only be active in training mode
@@ -44,9 +41,7 @@ class TestModelEdgeCases:
 
         for input_size in input_sizes:
             model = FrequencyExtractorLSTM(
-                input_size=input_size,
-                hidden_size=16,
-                num_layers=1
+                input_size=input_size, hidden_size=16, num_layers=1
             )
 
             x = torch.randn(2, input_size)
@@ -57,11 +52,7 @@ class TestModelEdgeCases:
 
     def test_model_with_large_hidden_size(self):
         """Test model with large hidden size"""
-        model = FrequencyExtractorLSTM(
-            input_size=5,
-            hidden_size=512,
-            num_layers=1
-        )
+        model = FrequencyExtractorLSTM(input_size=5, hidden_size=512, num_layers=1)
 
         x = torch.randn(1, 5)
         model.reset_hidden_state(1)
@@ -77,7 +68,7 @@ class TestModelEdgeCases:
                 input_size=5,
                 hidden_size=32,
                 num_layers=num_layers,
-                dropout=0.1 if num_layers > 1 else 0.0
+                dropout=0.1 if num_layers > 1 else 0.0,
             )
 
             x = torch.randn(2, 5)
@@ -131,11 +122,7 @@ class TestModelEdgeCases:
 
     def test_get_num_parameters(self):
         """Test parameter counting"""
-        model = FrequencyExtractorLSTM(
-            input_size=5,
-            hidden_size=64,
-            num_layers=1
-        )
+        model = FrequencyExtractorLSTM(input_size=5, hidden_size=64, num_layers=1)
 
         num_params = model.get_num_parameters()
 
@@ -247,21 +234,21 @@ class TestModelEdgeCases:
         model = FrequencyExtractorLSTM(input_size=5, hidden_size=16)
 
         # Test CPU
-        model_cpu = model.to('cpu')
+        model_cpu = model.to("cpu")
         x_cpu = torch.randn(1, 5)
-        model_cpu.reset_hidden_state(1, device='cpu')
+        model_cpu.reset_hidden_state(1, device="cpu")
         output_cpu = model_cpu(x_cpu)
 
-        assert output_cpu.device.type == 'cpu'
+        assert output_cpu.device.type == "cpu"
 
         # Test CUDA if available
         if torch.cuda.is_available():
-            model_cuda = model.to('cuda')
+            model_cuda = model.to("cuda")
             x_cuda = torch.randn(1, 5).cuda()
-            model_cuda.reset_hidden_state(1, device='cuda')
+            model_cuda.reset_hidden_state(1, device="cuda")
             output_cuda = model_cuda(x_cuda)
 
-            assert output_cuda.device.type == 'cuda'
+            assert output_cuda.device.type == "cuda"
 
     def test_model_train_eval_mode_switching(self):
         """Test switching between train and eval modes"""

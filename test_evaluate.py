@@ -8,16 +8,17 @@ Tests evaluation functionality including:
 - Results saving
 """
 
-import torch
+import json
+import tempfile
+from pathlib import Path
+
 import numpy as np
 import pytest
-import tempfile
-import json
-from pathlib import Path
+import torch
 from torch.utils.data import DataLoader
 
-from model import FrequencyExtractorLSTM
 from data_generator import create_datasets
+from model import FrequencyExtractorLSTM
 
 
 class TestMetricComputation:
@@ -150,7 +151,7 @@ class TestModelEvaluation:
             duration=0.5,
             noise_std=0.1,
             train_seed=1,
-            test_seed=2
+            test_seed=2,
         )
 
         # Create model
@@ -239,11 +240,11 @@ class TestSignalReconstruction:
         duration = 0.5
         time = np.linspace(0, duration, int(sampling_rate * duration))
 
-        data_to_save = {'time': time}
+        data_to_save = {"time": time}
 
         for freq in frequencies:
             signal = np.sin(2 * np.pi * freq * time)
-            data_to_save[f'freq_{freq}'] = signal
+            data_to_save[f"freq_{freq}"] = signal
 
         with tempfile.TemporaryDirectory() as tmpdir:
             save_path = Path(tmpdir) / "reconstructed.npz"
@@ -254,11 +255,11 @@ class TestSignalReconstruction:
             # Load and verify
             loaded = np.load(save_path)
 
-            assert 'time' in loaded
-            assert len(loaded['time']) == len(time)
+            assert "time" in loaded
+            assert len(loaded["time"]) == len(time)
 
             for freq in frequencies:
-                key = f'freq_{freq}'
+                key = f"freq_{freq}"
                 assert key in loaded
                 assert len(loaded[key]) == len(time)
 
@@ -272,54 +273,51 @@ class TestResultsSaving:
     def test_save_results_json(self):
         """Test saving results to JSON"""
         results = {
-            'config': {
-                'frequencies': [1.0, 3.0, 5.0, 7.0],
-                'noise_std': 0.1
+            "config": {"frequencies": [1.0, 3.0, 5.0, 7.0], "noise_std": 0.1},
+            "train_metrics": {
+                "mse": 0.123,
+                "rmse": 0.351,
+                "mae": 0.280,
+                "max_error": 1.234,
             },
-            'train_metrics': {
-                'mse': 0.123,
-                'rmse': 0.351,
-                'mae': 0.280,
-                'max_error': 1.234
+            "test_metrics": {
+                "mse": 0.125,
+                "rmse": 0.354,
+                "mae": 0.282,
+                "max_error": 1.256,
             },
-            'test_metrics': {
-                'mse': 0.125,
-                'rmse': 0.354,
-                'mae': 0.282,
-                'max_error': 1.256
-            },
-            'per_freq_mse': [0.12, 0.13, 0.12, 0.13]
+            "per_freq_mse": [0.12, 0.13, 0.12, 0.13],
         }
 
         with tempfile.TemporaryDirectory() as tmpdir:
             save_path = Path(tmpdir) / "results.json"
 
             # Save
-            with open(save_path, 'w') as f:
+            with open(save_path, "w") as f:
                 json.dump(results, f, indent=2)
 
             # Load and verify
-            with open(save_path, 'r') as f:
+            with open(save_path, "r") as f:
                 loaded = json.load(f)
 
-            assert loaded['train_metrics']['mse'] == 0.123
-            assert loaded['test_metrics']['mse'] == 0.125
-            assert len(loaded['per_freq_mse']) == 4
+            assert loaded["train_metrics"]["mse"] == 0.123
+            assert loaded["test_metrics"]["mse"] == 0.125
+            assert len(loaded["per_freq_mse"]) == 4
 
     def test_results_structure(self):
         """Test results dictionary structure"""
         results = {
-            'config': {},
-            'train_metrics': {},
-            'test_metrics': {},
-            'generalization_ratio': 1.0
+            "config": {},
+            "train_metrics": {},
+            "test_metrics": {},
+            "generalization_ratio": 1.0,
         }
 
         # Verify required keys
-        assert 'config' in results
-        assert 'train_metrics' in results
-        assert 'test_metrics' in results
-        assert 'generalization_ratio' in results
+        assert "config" in results
+        assert "train_metrics" in results
+        assert "test_metrics" in results
+        assert "generalization_ratio" in results
 
 
 class TestGeneralizationAnalysis:
@@ -416,8 +414,8 @@ class TestBatchEvaluation:
         batch_mses = []
 
         for i in range(0, num_samples, batch_size):
-            batch_pred = predictions[i:i+batch_size]
-            batch_targ = targets[i:i+batch_size]
+            batch_pred = predictions[i : i + batch_size]
+            batch_targ = targets[i : i + batch_size]
 
             batch_mse = np.mean((batch_pred - batch_targ) ** 2)
             batch_mses.append(batch_mse)
